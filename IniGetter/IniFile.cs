@@ -53,6 +53,29 @@ namespace IniGetter
         /// A collection of parse warnings that occurred during the previous parse
         /// </summary>
         public string[] ParseWarnings { get => _parseWarnings.ToArray(); }
+
+        public static IniFile operator +(IniFile first, IniFile second)
+        {
+            IniFile result = new IniFile(first.Options);
+
+            result._iniItems.AddRange(first._iniItems);
+            foreach (var item in second._iniItems)
+            {
+                var oldItem = result._iniItems.GetIniItem(item.Section, item.Key);
+                if (oldItem == null)
+                {
+                    result._iniItems.Add(item);
+                }
+                else
+                {
+                    result.SetParseWarning(0, $"Item overwritten [{oldItem.Section}][{oldItem.Key}] value ({oldItem.Value}) overwritten by ({item.Value})");
+                    oldItem.Value = item.Value;
+                    oldItem.Comment = item.Comment;
+                }
+            }
+            return result;
+        }
+
         public static string UnescapeString(string str)
         {
             return str;
@@ -64,6 +87,24 @@ namespace IniGetter
         public void Clear()
         {
             _iniItems.Clear();
+        }
+
+        /// <summary>
+        /// For IComparable. Not efficient, but we should not expect a lot of comparisons
+        /// </summary>
+        /// <param name="obj">object to compare to</param>
+        /// <returns>Comparison value</returns>
+        public int CompareTo(object obj)
+        {
+            if (obj.GetType() == typeof(IniFile))
+            {
+                return this.ToString().CompareTo(((IniFile)obj).ToString());
+            }
+            else if (obj.GetType() == typeof(string))
+            {
+                return this.ToString().CompareTo(obj as string);
+            }
+            return -1;
         }
 
         /// <summary>
@@ -187,38 +228,6 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Set a setting in this INI instance
-        /// </summary>
-        /// <param name="section">Section name (Empty string if global)</param>
-        /// <param name="key">Key name of the setting</param>
-        /// <param name="value">Value of the setting</param>
-        /// <param name="comment">Optional end of line comment</param>
-        /// <returns>True if it overwrote an existing value, False if it is a new entry</returns>
-        public bool Set(string section, string key, string value, string comment = null)
-        {
-            bool bReturn = false;
-
-            var item = _iniItems.GetIniItem(ConvertName(section), ConvertName(key));
-            if (item != null)
-            {
-                item.Value = value;
-                item.Comment = comment;
-            }
-            else
-            {
-                var newItem = new IniItem()
-                {
-                    Section = ConvertName(section),
-                    Key = ConvertName(key),
-                    Value = value,
-                    Comment = comment
-                };
-                _iniItems.Add(newItem);
-            }
-            return bReturn;
-        }
-
-        /// <summary>
         /// Get the key names of the loaded values for a section
         /// </summary>
         /// <param name="sectionName">The section name to query for (Empty string or null for global section)</param>
@@ -251,10 +260,11 @@ namespace IniGetter
             string[] iniLines = new string[] { };
             if (!mergeFile)
             {
-                _iniItems.Clear();
+                Clear();
             }
             try
             {
+                ClearParseWarnings();
                 if (System.IO.File.Exists(filePath))
                 {
                     try
@@ -272,7 +282,7 @@ namespace IniGetter
                     bReturn = false;
                 }
             }
-            catch ( Exception ex)
+            catch (Exception ex)
             {
                 SetParseWarning(0, $"Unable to retrieve file [{filePath}] contents: {ex.Message}");
                 bReturn = false;
@@ -296,12 +306,67 @@ namespace IniGetter
         {
             if (!mergeFile)
             {
-                _iniItems.Clear();
+                Clear();
             }
             string[] iniLines = data.ToLines();
+            ClearParseWarnings();
             return ParseFromLines(iniLines, prefix);
         }
 
+        /// <summary>
+        /// Saves the settings loaded in this instance to a file
+        /// </summary>
+        /// <param name="filePath">Path of file to write out</param>
+        /// <returns>true if the save occurs without issues, false if an error occurs</returns>
+        public bool Save(string filePath)
+        {
+            ClearLastWarning();
+            bool bReturn = false;
+
+            try
+            {
+                System.IO.File.WriteAllText(filePath, this.ToString());
+                bReturn = true;
+            }
+            catch (Exception ex)
+            {
+                SetLastWarning($"Error occurred saving ini file [{filePath}]: {ex.Message}");
+            }
+
+            return bReturn;
+        }
+
+        /// <summary>
+        /// Set a setting in this INI instance
+        /// </summary>
+        /// <param name="section">Section name (Empty string if global)</param>
+        /// <param name="key">Key name of the setting</param>
+        /// <param name="value">Value of the setting</param>
+        /// <param name="comment">Optional end of line comment</param>
+        /// <returns>True if it overwrote an existing value, False if it is a new entry</returns>
+        public bool Set(string section, string key, string value, string comment = null)
+        {
+            bool bReturn = false;
+
+            var item = _iniItems.GetIniItem(ConvertName(section), ConvertName(key));
+            if (item != null)
+            {
+                item.Value = value;
+                item.Comment = comment;
+            }
+            else
+            {
+                var newItem = new IniItem()
+                {
+                    Section = ConvertName(section),
+                    Key = ConvertName(key),
+                    Value = value,
+                    Comment = comment
+                };
+                _iniItems.Add(newItem);
+            }
+            return bReturn;
+        }
         /// <summary>
         /// Outputs a valid INI formatted string, based on the contents of this instance
         /// </summary>
@@ -352,30 +417,6 @@ namespace IniGetter
             }
             return sbFileContent.ToString();
         }
-
-        /// <summary>
-        /// Saves the settings loaded in this instance to a file
-        /// </summary>
-        /// <param name="filePath">Path of file to write out</param>
-        /// <returns>true if the save occurs without issues, false if an error occurs</returns>
-        public bool Save(string filePath)
-        {
-            ClearLastWarning();
-            bool bReturn = false;
-
-            try
-            {
-                System.IO.File.WriteAllText(filePath, this.ToString());
-                bReturn = true;
-            }
-            catch (Exception ex)
-            {
-                SetLastWarning($"Error occurred saving ini file [{filePath}]: {ex.Message}");
-            }
-
-            return bReturn;
-        }
-
         private void ClearLastWarning()
         {
             LastWarning = "";
@@ -383,6 +424,7 @@ namespace IniGetter
 
         private void ClearParseWarnings()
         {
+            ClearLastWarning();
             _parseWarnings.Clear();
         }
 
@@ -409,6 +451,46 @@ namespace IniGetter
         private bool IsComment(char ch)
         {
             return (ch == ';') || (Options.PoundComment && (ch == '#'));
+        }
+
+        private bool ParseFromLines(string[] lines, string prefix)
+        {
+            string currentSection = "";
+            bool bReturn = false;
+            bool bMultiLine = false;
+            int currentLineNumber = 1;
+            string previousLine = "";
+
+            foreach (string line in lines)
+            {
+                string workLine = line.Trim();
+                if (Options.MultilineSupport)
+                {
+                    if (bMultiLine)
+                    {
+                        workLine = previousLine + workLine;
+                        bMultiLine = false;
+                    }
+                    if (!String.IsNullOrEmpty(workLine) && workLine[^1] == '\\')
+                    {
+                        // Add in next line
+                        bMultiLine = true;
+                        previousLine = workLine[0..^1];
+                    }
+
+                }
+                if (!bMultiLine && !string.IsNullOrEmpty(workLine))
+                {
+                    currentSection = ParseLine(currentLineNumber, workLine, currentSection, prefix);
+                }
+                currentLineNumber++;
+            }
+            // Handle case where multi-line slash is present on last line
+            if (bMultiLine)
+            {
+                ParseLine(currentLineNumber, previousLine, currentSection, prefix);
+            }
+            return bReturn;
         }
 
         private string ParseLine(int currentLineNumber, string workLine, string currentSection, string prefix)
@@ -501,47 +583,6 @@ namespace IniGetter
             }
             return currentSection;
         }
-
-        private bool ParseFromLines(string[] lines, string prefix)
-        {
-            string currentSection = "";
-            bool bReturn = false;
-            bool bMultiLine = false;
-            int currentLineNumber = 1;
-            string previousLine = "";
-
-            foreach (string line in lines)
-            {
-                string workLine = line.Trim();
-                if (Options.MultilineSupport)
-                {
-                    if ( bMultiLine )
-                    {
-                        workLine = previousLine + workLine;
-                        bMultiLine = false;
-                    }
-                    if (!String.IsNullOrEmpty(workLine) && workLine[^1] == '\\')
-                    {
-                        // Add in next line
-                        bMultiLine = true;
-                        previousLine = workLine[0..^1];
-                    }
-
-                }
-                if (!bMultiLine && !string.IsNullOrEmpty(workLine))
-                {
-                    currentSection = ParseLine(currentLineNumber, workLine, currentSection, prefix);
-                }
-                currentLineNumber++;
-            }
-            // Handle case where multi-line slash is present on last line
-            if ( bMultiLine )
-            {
-                ParseLine(currentLineNumber, previousLine, currentSection, prefix);
-            }
-            return bReturn;
-        }
-
         private void SetLastWarning(string warning)
         {
             LastWarning = warning;
@@ -552,45 +593,6 @@ namespace IniGetter
             string warningText = $"Line {line} : {warning}";
             _parseWarnings.Add(warningText);
             SetLastWarning(warningText);
-        }
-
-        /// <summary>
-        /// For IComparable. Not efficient, but we should not expect a lot of comparisons
-        /// </summary>
-        /// <param name="obj">object to compare to</param>
-        /// <returns>Comparison value</returns>
-        public int CompareTo(object obj)
-        {
-            if ( obj.GetType() == typeof(IniFile) )
-            {
-                return this.ToString().CompareTo(((IniFile)obj).ToString());
-            }
-            else if ( obj.GetType() == typeof(string) )
-            {
-                return this.ToString().CompareTo(obj as string);
-            }
-            return -1;
-        }
-
-        public static IniFile operator+ (IniFile first, IniFile second)
-        {
-            IniFile result = new IniFile(first.Options);
-
-            result._iniItems.AddRange(first._iniItems);
-            foreach( var item in second._iniItems)
-            {
-                var oldItem = result._iniItems.GetIniItem(item.Section, item.Key);
-                if ( oldItem == null )
-                {
-                    result._iniItems.Add(item);
-                }
-                else
-                {
-                    oldItem.Value = item.Value;
-                    oldItem.Comment = item.Comment;
-                }
-            }
-            return result;
         }
     }
 }

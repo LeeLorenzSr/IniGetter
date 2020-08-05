@@ -1,18 +1,17 @@
 using NUnit.Framework;
-using IniGetter;
-using System;
-using System.Diagnostics;
 
 namespace IniGetter.Tests
 {
     public class Tests
     {
-        [SetUp]
-        public void Setup()
+        [Test]
+        public void AlternativeKeyValuePairDelimiterTest()
         {
+            IniFile iniTest = new IniFile("Data\\ColonDelimiter.ini", new IniOptions() { NameValueDelimiter = ':' });
+
+            Assert.AreEqual("FirstValue", iniTest.Get("FirstSection", "FirstKey", "-"));
+            Assert.IsTrue(iniTest.Get("FirstSection", "SecondKey", false));
         }
-        
-        // TODO: Write a lot more tests!
 
         [Test]
         public void CreationAndWriteTests()
@@ -22,6 +21,26 @@ namespace IniGetter.Tests
             iniTest.Set("SectionAlpha", "FirstKey", "FirstValue");
 
             Assert.AreEqual("FirstValue", iniTest.Get("SectionAlpha", "FirstKey", "-"));
+        }
+
+        [Test]
+        public void GarbageInTest()
+        {
+            IniFile iniTest = new IniFile("Data\\Garbage.ini");
+
+            Assert.NotZero(iniTest.ParseWarnings.Length);
+            Assert.Zero(iniTest.GetSectionNames().Length);
+        }
+
+        [Test]
+        public void MergeWithPrefixTest()
+        {
+            IniFile iniTest = new IniFile("Data\\FirstMerge.ini", null, "FirstFile.");
+            iniTest.Load("Data\\SecondMerge.ini", true, "SecondFile.");
+
+            Assert.Zero(iniTest.ParseWarnings.Length);
+            Assert.AreEqual("FirstValue", iniTest.Get("FirstFile.FirstSection", "FirstKey", "-"));
+            Assert.AreEqual("SecondFileFirstValue", iniTest.Get("SecondFile.FirstSection", "FirstKey", "-"));
         }
 
         [Test]
@@ -44,33 +63,9 @@ namespace IniGetter.Tests
             Assert.AreEqual(sGetFirstIni, iniDuplicate.ToString());
         }
 
-        [Test]
-        public void AlternativeKeyValuePairDelimiterTest()
+        [SetUp]
+        public void Setup()
         {
-            IniFile iniTest = new IniFile("Data\\ColonDelimiter.ini", new IniOptions() { NameValueDelimiter = ':' });
-
-            Assert.AreEqual("FirstValue", iniTest.Get("FirstSection", "FirstKey", "-"));
-            Assert.IsTrue(iniTest.Get("FirstSection", "SecondKey", false));
-        }
-
-        [Test]
-        public void MergeWithPrefixTest()
-        {
-            IniFile iniTest = new IniFile("Data\\FirstMerge.ini", null, "FirstFile.");
-            iniTest.Load("Data\\SecondMerge.ini", true, "SecondFile.");
-
-            Assert.Zero(iniTest.ParseWarnings.Length);
-            Assert.AreEqual("FirstValue", iniTest.Get("FirstFile.FirstSection", "FirstKey", "-"));
-            Assert.AreEqual("SecondFileFirstValue", iniTest.Get("SecondFile.FirstSection", "FirstKey", "-"));            
-        }
-
-        [Test]
-        public void GarbageInTest()
-        {
-            IniFile iniTest = new IniFile("Data\\Garbage.ini");
-
-            Assert.NotZero(iniTest.ParseWarnings.Length);
-            Assert.Zero(iniTest.GetSectionNames().Length);
         }
     }
 }
