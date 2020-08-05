@@ -2,10 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>(C) 2020 Lee Lorenz Sr</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Company>Lee Lorenz Sr</Company>
+    <Authors>Lee Lorenz Sr</Authors>
+    <Description>Ini format file handler for .NET Standard for robust handling of legacy INI files with support for quoted, escaped values, saving and merging of data.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
