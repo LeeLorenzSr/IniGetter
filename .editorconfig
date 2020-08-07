@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE0056: Use index operator
+csharp_style_prefer_index_operator = true:none
+
+# IDE0057: Use range operator
+csharp_style_prefer_range_operator = true:none

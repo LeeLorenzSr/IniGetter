@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IniGetter", "IniGetter\IniGetter.csproj", "{286A3FF5-ABDA-45F6-BF0E-A9C66DCD6B26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IniGetter", "IniGetter\IniGetter.csproj", "{286A3FF5-ABDA-45F6-BF0E-A9C66DCD6B26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IniGetter.Tests", "IniGetter.Tests\IniGetter.Tests.csproj", "{88BE4E78-1C0B-4800-9AFF-52BBE20D9EBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IniGetter.Tests", "IniGetter.Tests\IniGetter.Tests.csproj", "{88BE4E78-1C0B-4800-9AFF-52BBE20D9EBC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7F8F4C68-89C5-4C72-83C5-5ACDEDA8AA94}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

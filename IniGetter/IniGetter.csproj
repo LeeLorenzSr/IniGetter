@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net40;net35;net45;net451;net46;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Copyright>(C) 2020 Lee Lorenz Sr</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -10,10 +10,10 @@
     <Description>Ini format file handler for .NET Standard for robust handling of legacy INI files with support for quoted, escaped values, saving and merging of data.</Description>
     <PackageProjectUrl>https://github.com/LeeLorenzSr/IniGetter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LeeLorenzSr/IniGetter</RepositoryUrl>
-    <PackageReleaseNotes>Downgraded .NET Standard and Newtonsoft.JSON dependencies</PackageReleaseNotes>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Set up Multi-target in project file</PackageReleaseNotes>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
