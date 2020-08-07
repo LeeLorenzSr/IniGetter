@@ -63,6 +63,36 @@ namespace IniGetter.Tests
             Assert.AreEqual(sGetFirstIni, iniDuplicate.ToString());
         }
 
+        [Test]
+        public void PlusOperatorTest()
+        {
+            IniFile iniTestA = new IniFile("Data\\FirstMerge.ini");
+            IniFile iniTestB = new IniFile("Data\\MergeColon.ini", new IniOptions() { NameValueDelimiter = ':' });
+
+            var iniResult = iniTestA + iniTestB;
+
+            Assert.AreEqual("FirstValue", iniResult.Get("firstsection", "FirstKey", ""));
+            Assert.IsTrue(iniResult.Get("firstsection", "secondkey", false));
+            Assert.AreEqual(10.123, iniResult.Get("firstsection", "ThirdKey", 1.2));
+            Assert.AreEqual("ColonValue", iniResult.Get("firstsection", "FourthKey", ""));
+            Assert.IsTrue( iniResult.Get("FirstSection", "FifthKey", false));
+        }
+
+        [Test]
+        public void PlusEqualOperatorTest()
+        {
+            IniFile iniTestA = new IniFile("Data\\FirstMerge.ini");
+            IniFile iniTestB = new IniFile("Data\\MergeColon.ini", new IniOptions() { NameValueDelimiter = ':' });
+
+            iniTestA += iniTestB;
+
+            Assert.AreEqual("FirstValue", iniTestA.Get("firstsection", "FirstKey", ""));
+            Assert.IsTrue(iniTestA.Get("firstsection", "secondkey", false));
+            Assert.AreEqual(10.123, iniTestA.Get("firstsection", "ThirdKey", 1.2));
+            Assert.AreEqual("ColonValue", iniTestA.Get("firstsection", "FourthKey", ""));
+            Assert.IsTrue(iniTestA.Get("FirstSection", "FifthKey", false));
+        }
+
         [SetUp]
         public void Setup()
         {

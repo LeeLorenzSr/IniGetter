@@ -471,11 +471,11 @@ namespace IniGetter
                         workLine = previousLine + workLine;
                         bMultiLine = false;
                     }
-                    if (!String.IsNullOrEmpty(workLine) && workLine[^1] == '\\')
+                    if (!String.IsNullOrEmpty(workLine) && workLine[workLine.Length-1] == '\\')
                     {
                         // Add in next line
                         bMultiLine = true;
-                        previousLine = workLine[0..^1];
+                        previousLine = workLine.Substring(0,workLine.Length-1);
                     }
 
                 }
@@ -504,7 +504,7 @@ namespace IniGetter
                     int endPos = tempLine.IndexOf(']');
                     if (endPos > 1)
                     {
-                        string sectionName = ConvertName(prefix + tempLine[1..endPos].Trim());
+                        string sectionName = ConvertName(prefix + tempLine.Substring(1,endPos-1).Trim());
                         if (sectionName.ValidateName())
                         {
                             currentSection = sectionName;
@@ -539,7 +539,7 @@ namespace IniGetter
                                 if ( commentCheck > -1 )
                                 {
                                     commentPart = valueCheck.Substring(commentCheck + 1).Trim();
-                                    valueCheck = valueCheck[0..commentCheck].Trim();
+                                    valueCheck = valueCheck.Substring(0,commentCheck).Trim();
                                 }
                                 else
                                 {
@@ -547,7 +547,7 @@ namespace IniGetter
                                     if (commentCheck > -1)
                                     {
                                         commentPart = valueCheck.Substring(commentCheck + 1).Trim();
-                                        valueCheck = valueCheck[0..commentCheck].Trim();
+                                        valueCheck = valueCheck.Substring(0, commentCheck).Trim();
                                     }
                                 }
                             }

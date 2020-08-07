@@ -10,12 +10,16 @@
     <None Remove="Data\ColonDelimiter.ini" />
     <None Remove="Data\FirstMerge.ini" />
     <None Remove="Data\Garbage.ini" />
+    <None Remove="Data\MergeColon.ini" />
     <None Remove="Data\MultiLine.ini" />
     <None Remove="Data\SecondMerge.ini" />
     <None Remove="Data\TestIni01.ini" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Data\MergeColon.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\ColonDelimiter.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
