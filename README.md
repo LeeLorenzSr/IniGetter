@@ -34,4 +34,12 @@ IniGetter is a library intended to standardize access to this format and provide
     IsAnotherThing=0
     IsNotAnything=no    
 
+## Using IniGetter:
+
+    IniFile iniMySettings = new IniFile("C:\\Data\\MyIniFile.ini");
+    
+    string someValue = iniMySettings.Get("TheSection", "TheKey", "a default value");
+    bool someBoolean = iniMySettings.Get("TheSection", "TheBooleanKey", false);
+    
+
 
