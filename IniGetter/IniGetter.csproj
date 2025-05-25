@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net40;net35;net45;net451;net46;net461;netcoreapp3.1;net8.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Copyright>(C) 2020 Lee Lorenz Sr</Copyright>
+    <Copyright>(C) 2025 Lee Lorenz Sr</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Company>Lee Lorenz Sr</Company>
     <Authors>Lee Lorenz Sr</Authors>
@@ -11,9 +11,9 @@
     <PackageProjectUrl>https://github.com/LeeLorenzSr/IniGetter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LeeLorenzSr/IniGetter</RepositoryUrl>
     <PackageReleaseNotes>Set up Multi-target in project file</PackageReleaseNotes>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
-    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
