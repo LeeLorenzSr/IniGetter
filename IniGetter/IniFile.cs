@@ -7,15 +7,18 @@ using IniGetter.Helpers;
 
 namespace IniGetter
 {
+    /// <summary>
+    /// Represents an INI file and provides methods to load, save, and manipulate INI data.
+    /// </summary>
     public class IniFile : IComparable
     {
         private readonly List<IniItem> _iniItems = new List<IniItem>();
         private readonly List<string> _parseWarnings = new List<string>();
 
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="IniFile"/> class with optional options.
         /// </summary>
-        /// <param name="options">Options used to handle the ini file</param>
+        /// <param name="options">Options used to handle the INI file.</param>
         public IniFile(IniOptions options = null)
         {
             if (options != null)
@@ -29,31 +32,34 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="IniFile"/> class and loads from a file.
         /// </summary>
-        /// <param name="filePath">file path to ini file</param>
-        /// <param name="options">Options used to handle the ini file</param>
-        /// <param name="prefix">Optional prefix appended to section names when parsing file</param>
+        /// <param name="filePath">File path to INI file.</param>
+        /// <param name="options">Options used to handle the INI file.</param>
+        /// <param name="prefix">Optional prefix appended to section names when parsing file.</param>
         public IniFile(string filePath, IniOptions options = null, string prefix = "") : this(options)
         {
             Load(filePath, false, prefix);
         }
 
         /// <summary>
-        /// The last warning generated during the previous operation
+        /// Gets the last warning generated during the previous operation.
         /// </summary>
         public string LastWarning { get; private set; } = "";
 
         /// <summary>
-        /// Options used when creating this instance
+        /// Gets the options used when creating this instance.
         /// </summary>
         public IniOptions Options { get; }
 
         /// <summary>
-        /// A collection of parse warnings that occurred during the previous parse
+        /// Gets a collection of parse warnings that occurred during the previous parse.
         /// </summary>
         public string[] ParseWarnings { get => _parseWarnings.ToArray(); }
 
+        /// <summary>
+        /// Combines two <see cref="IniFile"/> instances into a new one.
+        /// </summary>
         public static IniFile operator +(IniFile first, IniFile second)
         {
             IniFile result = new IniFile(first.Options);
@@ -76,13 +82,16 @@ namespace IniGetter
             return result;
         }
 
+        /// <summary>
+        /// Unescapes a string (currently a no-op).
+        /// </summary>
         public static string UnescapeString(string str)
         {
             return str;
         }
 
         /// <summary>
-        /// Clear all values loaded into this instance
+        /// Clears all values loaded into this instance.
         /// </summary>
         public void Clear()
         {
@@ -90,10 +99,10 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// For IComparable. Not efficient, but we should not expect a lot of comparisons
+        /// Compares this instance to another object for sorting or equality.
         /// </summary>
-        /// <param name="obj">object to compare to</param>
-        /// <returns>Comparison value</returns>
+        /// <param name="obj">Object to compare to.</param>
+        /// <returns>Comparison value.</returns>
         public int CompareTo(object obj)
         {
             if (obj.GetType() == typeof(IniFile))
@@ -108,12 +117,12 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Get a string value from the loaded INI settings
+        /// Gets a string value from the loaded INI settings.
         /// </summary>
-        /// <param name="section">The section for this setting, (Global section will use an empty string)</param>
-        /// <param name="key">Name of the setting within the section</param>
-        /// <param name="defaultValue">The default string value, if the setting is not present</param>
-        /// <returns>Returns the value of the setting as a string</returns>
+        /// <param name="section">The section for this setting (Global section will use an empty string).</param>
+        /// <param name="key">Name of the setting within the section.</param>
+        /// <param name="defaultValue">The default string value, if the setting is not present.</param>
+        /// <returns>The value of the setting as a string.</returns>
         public string Get(string section, string key, string defaultValue = null)
         {
             string sReturn = defaultValue;
@@ -128,20 +137,12 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Get a boolean value from the loaded INI settings
-        /// This is a robust parse of the value:
-        ///  - accepting any numeric value other than 0 as true (0 is false)
-        ///  - True/False
-        ///  - On/Off
-        ///  - Yes/No
-        ///  - Enable/Disable
-        ///  - Enabled/Disabled
-        ///  - Active/Inactive
+        /// Gets a boolean value from the loaded INI settings.
         /// </summary>
-        /// <param name="section">The section for this setting, (Global section will use an empty string)</param>
-        /// <param name="key">Name of the setting within the section</param>
-        /// <param name="defaultValue">The default boolean value, if the setting is not present</param>
-        /// <returns>Returns the value of the setting as a boolean</returns>
+        /// <param name="section">The section for this setting (Global section will use an empty string).</param>
+        /// <param name="key">Name of the setting within the section.</param>
+        /// <param name="defaultValue">The default boolean value, if the setting is not present.</param>
+        /// <returns>The value of the setting as a boolean.</returns>
         public bool Get(string section, string key, bool defaultValue)
         {
             bool bReturn = defaultValue;
@@ -149,7 +150,7 @@ namespace IniGetter
             string sVal = Get(section, key);
             if (sVal != null)
             {
-                if ( sVal.TryToRobustBoolean(out bool testValue))
+                if (sVal.TryToRobustBoolean(out bool testValue))
                 {
                     bReturn = testValue;
                 }
@@ -158,12 +159,12 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Get a double value from the loaded INI settings
+        /// Gets a double value from the loaded INI settings.
         /// </summary>
-        /// <param name="section">The section for this setting, (Global section will use an empty string)</param>
-        /// <param name="key">Name of the setting within the section</param>
-        /// <param name="defaultValue">The default double value, if the setting is not present</param>
-        /// <returns>Returns the value of the setting as a double</returns>
+        /// <param name="section">The section for this setting (Global section will use an empty string).</param>
+        /// <param name="key">Name of the setting within the section.</param>
+        /// <param name="defaultValue">The default double value, if the setting is not present.</param>
+        /// <returns>The value of the setting as a double.</returns>
         public double Get(string section, string key, double defaultValue)
         {
             double retVal = defaultValue;
@@ -184,12 +185,12 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Get an integer value from the loaded INI settings
+        /// Gets an integer value from the loaded INI settings.
         /// </summary>
-        /// <param name="section">The section for this setting, (Global section will use an empty string)</param>
-        /// <param name="key">Name of the setting within the section</param>
-        /// <param name="defaultValue">The default integer value, if the setting is not present</param>
-        /// <returns>Returns the value of the setting as an integer</returns>
+        /// <param name="section">The section for this setting (Global section will use an empty string).</param>
+        /// <param name="key">Name of the setting within the section.</param>
+        /// <param name="defaultValue">The default integer value, if the setting is not present.</param>
+        /// <returns>The value of the setting as an integer.</returns>
         public Int64 Get(string section, string key, Int64 defaultValue)
         {
             Int64 retVal = defaultValue;
@@ -210,11 +211,11 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Fetches the comment associated with this setting
+        /// Fetches the comment associated with this setting.
         /// </summary>
-        /// <param name="section">Section name</param>
-        /// <param name="key">Key name</param>
-        /// <returns>Comment, or empty string if there is none</returns>
+        /// <param name="section">Section name.</param>
+        /// <param name="key">Key name.</param>
+        /// <returns>Comment, or empty string if there is none.</returns>
         public string GetComment(string section, string key)
         {
             string retVal = string.Empty;
@@ -228,32 +229,31 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Get the key names of the loaded values for a section
+        /// Gets the key names of the loaded values for a section.
         /// </summary>
-        /// <param name="sectionName">The section name to query for (Empty string or null for global section)</param>
-        /// <returns>An array of key names</returns>
+        /// <param name="sectionName">The section name to query for (Empty string or null for global section).</param>
+        /// <returns>An array of key names.</returns>
         public string[] GetKeyNames(string sectionName)
         {
             return _iniItems.GetKeys(sectionName);
         }
 
         /// <summary>
-        /// Get the section names of the loaded values
+        /// Gets the section names of the loaded values.
         /// </summary>
-        /// <returns>An array of section names, including Global as an empty string, if it contains any values</returns>
+        /// <returns>An array of section names, including Global as an empty string, if it contains any values.</returns>
         public string[] GetSectionNames()
         {
             return _iniItems.GetSections();
         }
 
         /// <summary>
-        /// Load the values from an INI file
-        /// If you are merging, it may generate warnings
+        /// Loads the values from an INI file.
         /// </summary>
-        /// <param name="filePath">Path to the file containing valid INI format content</param>
-        /// <param name="mergeFile">If true, merges with any existing values already loaded</param>
-        /// <param name="prefix">A string that is prepended to the section names as the settings are loaded</param>
-        /// <returns>true if the loading occurs without warnings, false if warnings occur</returns>
+        /// <param name="filePath">Path to the file containing valid INI format content.</param>
+        /// <param name="mergeFile">If true, merges with any existing values already loaded.</param>
+        /// <param name="prefix">A string that is prepended to the section names as the settings are loaded.</param>
+        /// <returns>True if the loading occurs without warnings, false if warnings occur.</returns>
         public bool Load(string filePath, bool mergeFile = false, string prefix = "")
         {
             bool bReturn = true;
@@ -295,13 +295,12 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Load the values from an INI formated string
-        /// If you are merging, it may generate warnings
+        /// Loads the values from an INI formatted string.
         /// </summary>
-        /// <param name="data">String containing valid INI format content</param>
-        /// <param name="mergeFile">If true, merges with any existing values already loaded</param>
-        /// <param name="prefix">A string that is prepended to the section names as the settings are loaded</param>
-        /// <returns>true if the loading occurs without warnings, false if warnings occur</returns>
+        /// <param name="data">String containing valid INI format content.</param>
+        /// <param name="mergeFile">If true, merges with any existing values already loaded.</param>
+        /// <param name="prefix">A string that is prepended to the section names as the settings are loaded.</param>
+        /// <returns>True if the loading occurs without warnings, false if warnings occur.</returns>
         public bool LoadFromContent(string data, bool mergeFile = false, string prefix = "")
         {
             if (!mergeFile)
@@ -314,10 +313,10 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Saves the settings loaded in this instance to a file
+        /// Saves the settings loaded in this instance to a file.
         /// </summary>
-        /// <param name="filePath">Path of file to write out</param>
-        /// <returns>true if the save occurs without issues, false if an error occurs</returns>
+        /// <param name="filePath">Path of file to write out.</param>
+        /// <returns>True if the save occurs without issues, false if an error occurs.</returns>
         public bool Save(string filePath)
         {
             ClearLastWarning();
@@ -337,13 +336,13 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Set a setting in this INI instance
+        /// Sets a setting in this INI instance.
         /// </summary>
-        /// <param name="section">Section name (Empty string if global)</param>
-        /// <param name="key">Key name of the setting</param>
-        /// <param name="value">Value of the setting</param>
-        /// <param name="comment">Optional end of line comment</param>
-        /// <returns>True if it overwrote an existing value, False if it is a new entry</returns>
+        /// <param name="section">Section name (Empty string if global).</param>
+        /// <param name="key">Key name of the setting.</param>
+        /// <param name="value">Value of the setting.</param>
+        /// <param name="comment">Optional end of line comment.</param>
+        /// <returns>True if it overwrote an existing value, False if it is a new entry.</returns>
         public bool Set(string section, string key, string value, string comment = null)
         {
             bool bReturn = false;
@@ -367,10 +366,11 @@ namespace IniGetter
             }
             return bReturn;
         }
+
         /// <summary>
-        /// Outputs a valid INI formatted string, based on the contents of this instance
+        /// Outputs a valid INI formatted string, based on the contents of this instance.
         /// </summary>
-        /// <returns>INI-formatted string</returns>
+        /// <returns>INI-formatted string.</returns>
         public override string ToString()
         {
             bool bInsertLine = false;
@@ -417,6 +417,7 @@ namespace IniGetter
             }
             return sbFileContent.ToString();
         }
+
         private void ClearLastWarning()
         {
             LastWarning = "";
@@ -430,7 +431,7 @@ namespace IniGetter
 
         private string ConvertName(string name)
         {
-            if ( string.IsNullOrEmpty(name) )
+            if (string.IsNullOrEmpty(name))
             {
                 name = String.Empty;
             }
@@ -471,11 +472,11 @@ namespace IniGetter
                         workLine = previousLine + workLine;
                         bMultiLine = false;
                     }
-                    if (!String.IsNullOrEmpty(workLine) && workLine[workLine.Length-1] == '\\')
+                    if (!String.IsNullOrEmpty(workLine) && workLine[workLine.Length - 1] == '\\')
                     {
                         // Add in next line
                         bMultiLine = true;
-                        previousLine = workLine.Substring(0,workLine.Length-1);
+                        previousLine = workLine.Substring(0, workLine.Length - 1);
                     }
 
                 }
@@ -504,7 +505,7 @@ namespace IniGetter
                     int endPos = tempLine.IndexOf(']');
                     if (endPos > 1)
                     {
-                        string sectionName = ConvertName(prefix + tempLine.Substring(1,endPos-1).Trim());
+                        string sectionName = ConvertName(prefix + tempLine.Substring(1, endPos - 1).Trim());
                         if (sectionName.ValidateName())
                         {
                             currentSection = sectionName;
@@ -536,10 +537,10 @@ namespace IniGetter
                             {
                                 // Check for comments
                                 int commentCheck = valueCheck.IndexOf(';');
-                                if ( commentCheck > -1 )
+                                if (commentCheck > -1)
                                 {
                                     commentPart = valueCheck.Substring(commentCheck + 1).Trim();
-                                    valueCheck = valueCheck.Substring(0,commentCheck).Trim();
+                                    valueCheck = valueCheck.Substring(0, commentCheck).Trim();
                                 }
                                 else
                                 {
@@ -557,7 +558,7 @@ namespace IniGetter
                             {
                                 SetParseWarning(currentLineNumber, $"Item overwritten [{oldItem.Section}][{oldItem.Key}] value ({oldItem.Value}) overwritten by ({valuePart})");
                                 oldItem.Value = valuePart;
-                                oldItem.Comment = commentPart.Trim(); 
+                                oldItem.Comment = commentPart.Trim();
                             }
                             else
                             {
@@ -565,7 +566,7 @@ namespace IniGetter
                                 {
                                     Section = currentSection,
                                     Key = keyName,
-                                    Value = valuePart                                    
+                                    Value = valuePart
                                 };
                                 if (!String.IsNullOrEmpty(commentPart))
                                 {
@@ -583,6 +584,7 @@ namespace IniGetter
             }
             return currentSection;
         }
+
         private void SetLastWarning(string warning)
         {
             LastWarning = warning;
