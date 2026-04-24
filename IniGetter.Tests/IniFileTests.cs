@@ -125,13 +125,13 @@ namespace IniGetter.Tests
 
             try
             {
-                var saveDisabledIni = new IniFile();
+                var saveDisabledIni = new IniFile(new IniOptions { ReadOnly = false, AllowSave = false });
                 saveDisabledIni.Set("SectionAlpha", "FirstKey", "FirstValue");
 
                 Assert.IsFalse(saveDisabledIni.Save(filePath));
                 Assert.IsNotEmpty(saveDisabledIni.LastWarning);
 
-                var writableIni = new IniFile(new IniOptions { AllowSave = true });
+                var writableIni = new IniFile(new IniOptions { ReadOnly = false, AllowSave = true });
                 writableIni.Set("SectionAlpha", "FirstKey", "FirstValue");
 
                 Assert.IsTrue(writableIni.Save(filePath));

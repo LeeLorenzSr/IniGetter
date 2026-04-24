@@ -8,7 +8,7 @@
         /// <summary>
         /// Gets or sets a value indicating whether the INI file is read-only.
         /// </summary>
-        public bool ReadOnly { get; set; } = false;
+        public bool ReadOnly { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether saving is allowed.
