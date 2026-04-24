@@ -13,7 +13,7 @@
         /// <summary>
         /// Gets or sets a value indicating whether saving is allowed.
         /// </summary>
-        public bool AllowSave { get; set; } = true;
+        public bool AllowSave { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether section and key names are case sensitive.

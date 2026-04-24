@@ -76,9 +76,9 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Unescapes a string (currently a no-op).
+        /// Unescapes a string.
         /// </summary>
-        public static string UnescapeString(string str) => str.IniUnescaped();
+        public static string UnescapeString(string str) => str?.IniUnescaped();
 
         /// <summary>
         /// Clears all values loaded into this instance.
@@ -434,7 +434,7 @@ namespace IniGetter
 
             if (!Options.CaseSensitive)
             {
-                retVal = retVal.ToLower();
+                retVal = retVal.ToLowerInvariant();
             }
 
             return retVal;

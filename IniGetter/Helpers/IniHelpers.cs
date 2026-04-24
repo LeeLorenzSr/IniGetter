@@ -56,6 +56,11 @@ namespace IniGetter.Helpers
         /// <returns>The unescaped string.</returns>
         public static string IniUnescaped(this string str)
         {
+            if (str == null)
+            {
+                return null;
+            }
+
             var checkQuoted = new Regex(@"""[^""\\]*(?:\\.[^""\\]*)*""");
             var matchResult = checkQuoted.Match(str);
 
