@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace IniGetter
+﻿namespace IniGetter
 {
     /// <summary>
     /// Represents options for handling INI files.
@@ -12,12 +8,12 @@ namespace IniGetter
         /// <summary>
         /// Gets or sets a value indicating whether the INI file is read-only.
         /// </summary>
-        public bool ReadOnly { get; set; } = true;
+        public bool ReadOnly { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether saving is allowed.
         /// </summary>
-        public bool AllowSave { get; set; } = false;
+        public bool AllowSave { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether section and key names are case sensitive.

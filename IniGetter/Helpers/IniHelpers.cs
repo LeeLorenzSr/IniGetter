@@ -18,10 +18,8 @@ namespace IniGetter.Helpers
         /// <param name="section">The section name.</param>
         /// <param name="key">The key name.</param>
         /// <returns>The matching <see cref="IniItem"/>, or null if not found.</returns>
-        public static IniItem GetIniItem(this IEnumerable<IniItem> itemList, string section, string key)
-        {
-            return itemList.FirstOrDefault(x => x.Section == section && x.Key == key);
-        }
+        public static IniItem GetIniItem(this IEnumerable<IniItem> itemList, string section, string key) =>
+            itemList.FirstOrDefault(x => x.Section == section && x.Key == key);
 
         /// <summary>
         /// Gets all key names for a given section.
@@ -29,20 +27,16 @@ namespace IniGetter.Helpers
         /// <param name="itemList">The collection of INI items.</param>
         /// <param name="section">The section name.</param>
         /// <returns>An array of key names.</returns>
-        public static string[] GetKeys(this IEnumerable<IniItem> itemList, string section)
-        {
-            return itemList.Where(x => x.Section == section).Select(x => x.Key).Distinct().ToArray();
-        }
+        public static string[] GetKeys(this IEnumerable<IniItem> itemList, string section) =>
+            itemList.Where(x => x.Section == section).Select(x => x.Key).Distinct().ToArray();
 
         /// <summary>
         /// Gets all section names from the collection.
         /// </summary>
         /// <param name="itemList">The collection of INI items.</param>
         /// <returns>An array of section names.</returns>
-        public static string[] GetSections(this IEnumerable<IniItem> itemList)
-        {
-            return itemList.Select(x => x.Section).Distinct().ToArray();
-        }
+        public static string[] GetSections(this IEnumerable<IniItem> itemList) =>
+            itemList.Select(x => x.Section).Distinct().ToArray();
 
         /// <summary>
         /// Escapes a string for INI file output.
@@ -51,8 +45,8 @@ namespace IniGetter.Helpers
         /// <returns>The escaped string.</returns>
         public static string IniEscaped(this string str)
         {
-            string retVal = JsonConvert.ToString(str);
-            return (retVal.Contains('\\')) ? retVal : str;
+            var retVal = JsonConvert.ToString(str);
+            return retVal.Contains('\\') ? retVal : str;
         }
 
         /// <summary>
@@ -62,32 +56,28 @@ namespace IniGetter.Helpers
         /// <returns>The unescaped string.</returns>
         public static string IniUnescaped(this string str)
         {
-            Regex checkQuoted = new Regex(@"""[^""\\]*(?:\\.[^""\\]*)*""");
-            Match matchResult = checkQuoted.Match(str);
-            if (matchResult.Success)
-            {
-                return JsonConvert.DeserializeObject<string>(matchResult.Value);
-            }
-            else
-            {
-                return str;
-            }
+            var checkQuoted = new Regex(@"""[^""\\]*(?:\\.[^""\\]*)*""");
+            var matchResult = checkQuoted.Match(str);
+
+            return matchResult.Success
+                ? JsonConvert.DeserializeObject<string>(matchResult.Value)
+                : str;
         }
 
         /// <summary>
-        /// Splits a string into lines, trimming each line.
+        /// Splits a string into lines without trimming each line.
         /// </summary>
         /// <param name="str">The string to split.</param>
-        /// <returns>An array of trimmed lines.</returns>
+        /// <returns>An array of lines.</returns>
         public static string[] ToLines(this string str)
         {
-            List<string> retVal = new List<string>();
-            using (StringReader sr = new StringReader(str))
+            var retVal = new List<string>();
+            using (var sr = new StringReader(str))
             {
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    retVal.Add(line.Trim());
+                    retVal.Add(line);
                 }
             }
             return retVal.ToArray();
@@ -124,7 +114,7 @@ namespace IniGetter.Helpers
 
             if (!string.IsNullOrEmpty(str))
             {
-                switch (str.ToLower())
+                switch (str.ToLowerInvariant())
                 {
                     case "true":
                     case "yes":
@@ -146,7 +136,7 @@ namespace IniGetter.Helpers
                         break;
                     default:
                         {
-                            Regex regex = new Regex(@"^-?[0-9][0-9,\.]*$");
+                            var regex = new Regex(@"^-?[0-9][0-9,\.]*$");
                             if (regex.IsMatch(str))
                             {
                                 if (float.TryParse(str, out float testValue))
