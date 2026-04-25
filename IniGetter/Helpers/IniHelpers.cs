@@ -61,12 +61,86 @@ namespace IniGetter.Helpers
                 return null;
             }
 
-            var checkQuoted = new Regex(@"""[^""\\]*(?:\\.[^""\\]*)*""");
-            var matchResult = checkQuoted.Match(str);
-
-            return matchResult.Success
-                ? JsonConvert.DeserializeObject<string>(matchResult.Value)
+            return IsEntireQuotedString(str)
+                ? JsonConvert.DeserializeObject<string>(str)
                 : str;
+        }
+
+        /// <summary>
+        /// Attempts to extract a quoted INI value and optional trailing comment.
+        /// </summary>
+        /// <param name="str">The raw INI value string.</param>
+        /// <param name="allowPoundComment">Whether pound comments are enabled.</param>
+        /// <param name="valuePart">The extracted quoted value.</param>
+        /// <param name="commentPart">The extracted comment text without the comment marker.</param>
+        /// <returns>True if the input starts with a complete quoted value and has no trailing text other than whitespace or a comment.</returns>
+        public static bool TryExtractQuotedValue(this string str, bool allowPoundComment, out string valuePart, out string commentPart)
+        {
+            valuePart = str;
+            commentPart = null;
+
+            if (string.IsNullOrEmpty(str) || str[0] != '"')
+            {
+                return false;
+            }
+
+            int closingQuoteIndex = FindClosingQuoteIndex(str);
+            if (closingQuoteIndex < 0)
+            {
+                return false;
+            }
+
+            valuePart = str.Substring(0, closingQuoteIndex + 1);
+
+            var suffix = str.Substring(closingQuoteIndex + 1);
+            if (suffix.Trim().Length == 0)
+            {
+                return true;
+            }
+
+            var trimmedSuffix = suffix.TrimStart();
+            if (!trimmedSuffix.StartsWith(";") && !(allowPoundComment && trimmedSuffix.StartsWith("#")))
+            {
+                valuePart = str;
+                return false;
+            }
+
+            commentPart = trimmedSuffix.Substring(1).Trim();
+            return true;
+        }
+
+        private static bool IsEntireQuotedString(string str)
+        {
+            if (string.IsNullOrEmpty(str) || str[0] != '"')
+            {
+                return false;
+            }
+
+            return FindClosingQuoteIndex(str) == str.Length - 1;
+        }
+
+        private static int FindClosingQuoteIndex(string str)
+        {
+            for (int i = str.Length - 1; i > 0; i--)
+            {
+                if (str[i] != '"')
+                {
+                    continue;
+                }
+
+                int backslashCount = 0;
+                for (int j = i - 1; j >= 0 && str[j] == '\\'; j--)
+                {
+                    backslashCount++;
+                }
+
+                if (backslashCount % 2 == 0)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -95,7 +169,7 @@ namespace IniGetter.Helpers
         /// <returns>True if valid, otherwise false.</returns>
         public static bool ValidateName(this string str)
         {
-            Regex regex = new Regex(@"^[A-Za-z0-9_\-\!\ \.\@\&\^\$]+$");
+            Regex regex = new Regex(@"^[A-Za-z0-9_\-\! \.\@\&\^\$]+$");
 
             bool bReturn = false;
             if (str.Length > 0 && regex.IsMatch(str))

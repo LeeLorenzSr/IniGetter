@@ -119,6 +119,22 @@ namespace IniGetter.Tests
         }
 
         [Test]
+        public void UnescapeStringReturnsOriginalWhenQuotedSubstringIsEmbedded()
+        {
+            Assert.AreEqual("abc\"Line\\nBreak\"def", IniFile.UnescapeString("abc\"Line\\nBreak\"def"));
+        }
+
+        [Test]
+        public void LoadFromContentHandlesQuotedValuesWithInlineComments()
+        {
+            var iniTest = new IniFile();
+
+            Assert.IsTrue(iniTest.LoadFromContent("[Section]\nKey=\"Line\\nBreak\";comment"));
+            Assert.AreEqual("Line\nBreak", iniTest.Get("Section", "Key", string.Empty));
+            Assert.AreEqual("comment", iniTest.GetComment("Section", "Key"));
+        }
+
+        [Test]
         public void SaveHonorsOptions()
         {
             var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".ini");

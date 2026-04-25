@@ -522,11 +522,8 @@ namespace IniGetter
                         var keyName = ConvertName(workLine.Substring(0, endPos).Trim());
                         if (keyName.ValidateName())
                         {
-                            var checkQuoted = new Regex(@"""[^""\\]*(?:\\.[^""\\]*)*""");
-
                             var valueCheck = workLine.Substring(endPos + 1).Trim();
-                            var matchResult = checkQuoted.Match(valueCheck);
-                            if (!matchResult.Success)
+                            if (!valueCheck.TryExtractQuotedValue(Options.PoundComment, out string quotedValuePart, out string quotedCommentPart))
                             {
                                 // Check for comments
                                 int commentCheck = valueCheck.IndexOf(';');
@@ -544,6 +541,11 @@ namespace IniGetter
                                         valueCheck = valueCheck.Substring(0, commentCheck).Trim();
                                     }
                                 }
+                            }
+                            else
+                            {
+                                valueCheck = quotedValuePart;
+                                commentPart = quotedCommentPart;
                             }
                             var valuePart = valueCheck.IniUnescaped();
                             var oldItem = _iniItems.GetIniItem(ConvertName(currentSection), ConvertName(keyName));
