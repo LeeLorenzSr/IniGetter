@@ -10,7 +10,7 @@
     <Description>Ini format file handler for .NET Standard for robust handling of legacy INI files with support for quoted, escaped values, saving and merging of data.</Description>
     <PackageProjectUrl>https://github.com/LeeLorenzSr/IniGetter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LeeLorenzSr/IniGetter</RepositoryUrl>
-    <PackageReleaseNotes>Set up Multi-target in project file</PackageReleaseNotes>
+    <PackageReleaseNotes>Add multi-targeting support, improve save behavior and parsing, and include a changelog.</PackageReleaseNotes>
     <AssemblyVersion>1.0.4.0</AssemblyVersion>
     <FileVersion>1.0.4.0</FileVersion>
     <Version>1.0.4</Version>
