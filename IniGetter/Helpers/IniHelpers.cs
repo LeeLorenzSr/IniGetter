@@ -68,9 +68,23 @@ namespace IniGetter.Helpers
                 return null;
             }
 
-            return IsEntireQuotedString(str)
-                ? JsonConvert.DeserializeObject<string>(str)
-                : str;
+            if (!IsEntireQuotedString(str))
+            {
+                return str;
+            }
+
+            try
+            {
+                return JsonConvert.DeserializeObject<string>(str);
+            }
+            catch (JsonReaderException)
+            {
+                return str;
+            }
+            catch (JsonException)
+            {
+                return str;
+            }
         }
 
         /// <summary>
