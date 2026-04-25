@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace IniGetter
+﻿namespace IniGetter
 {
     /// <summary>
     /// Represents options for handling INI files.

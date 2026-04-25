@@ -21,14 +21,7 @@ namespace IniGetter
         /// <param name="options">Options used to handle the INI file.</param>
         public IniFile(IniOptions options = null)
         {
-            if (options != null)
-            {
-                this.Options = options;
-            }
-            else
-            {
-                this.Options = new IniOptions();
-            }
+            Options = options ?? new IniOptions();
         }
 
         /// <summary>
@@ -45,7 +38,7 @@ namespace IniGetter
         /// <summary>
         /// Gets the last warning generated during the previous operation.
         /// </summary>
-        public string LastWarning { get; private set; } = "";
+        public string LastWarning { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the options used when creating this instance.
@@ -55,7 +48,7 @@ namespace IniGetter
         /// <summary>
         /// Gets a collection of parse warnings that occurred during the previous parse.
         /// </summary>
-        public string[] ParseWarnings { get => _parseWarnings.ToArray(); }
+        public string[] ParseWarnings => _parseWarnings.ToArray();
 
         /// <summary>
         /// Combines two <see cref="IniFile"/> instances into a new one.
@@ -83,20 +76,14 @@ namespace IniGetter
         }
 
         /// <summary>
-        /// Unescapes a string (currently a no-op).
+        /// Unescapes a string.
         /// </summary>
-        public static string UnescapeString(string str)
-        {
-            return str;
-        }
+        public static string UnescapeString(string str) => str?.IniUnescaped();
 
         /// <summary>
         /// Clears all values loaded into this instance.
         /// </summary>
-        public void Clear()
-        {
-            _iniItems.Clear();
-        }
+        public void Clear() => _iniItems.Clear();
 
         /// <summary>
         /// Compares this instance to another object for sorting or equality.
@@ -105,14 +92,21 @@ namespace IniGetter
         /// <returns>Comparison value.</returns>
         public int CompareTo(object obj)
         {
-            if (obj.GetType() == typeof(IniFile))
+            if (obj == null)
             {
-                return this.ToString().CompareTo(((IniFile)obj).ToString());
+                return 1;
             }
-            else if (obj.GetType() == typeof(string))
+
+            if (obj is IniFile iniFile)
             {
-                return this.ToString().CompareTo(obj as string);
+                return ToString().CompareTo(iniFile.ToString());
             }
+
+            if (obj is string value)
+            {
+                return ToString().CompareTo(value);
+            }
+
             return -1;
         }
 
@@ -125,15 +119,8 @@ namespace IniGetter
         /// <returns>The value of the setting as a string.</returns>
         public string Get(string section, string key, string defaultValue = null)
         {
-            string sReturn = defaultValue;
-
             var item = _iniItems.GetIniItem(ConvertName(section), ConvertName(key));
-            if (item != null)
-            {
-                sReturn = item.Value;
-            }
-
-            return sReturn;
+            return item?.Value ?? defaultValue;
         }
 
         /// <summary>
@@ -145,17 +132,13 @@ namespace IniGetter
         /// <returns>The value of the setting as a boolean.</returns>
         public bool Get(string section, string key, bool defaultValue)
         {
-            bool bReturn = defaultValue;
-
-            string sVal = Get(section, key);
-            if (sVal != null)
+            var value = Get(section, key);
+            if (value != null && value.TryToRobustBoolean(out bool testValue))
             {
-                if (sVal.TryToRobustBoolean(out bool testValue))
-                {
-                    bReturn = testValue;
-                }
+                return testValue;
             }
-            return bReturn;
+
+            return defaultValue;
         }
 
         /// <summary>
@@ -191,17 +174,17 @@ namespace IniGetter
         /// <param name="key">Name of the setting within the section.</param>
         /// <param name="defaultValue">The default integer value, if the setting is not present.</param>
         /// <returns>The value of the setting as an integer.</returns>
-        public Int64 Get(string section, string key, Int64 defaultValue)
+        public long Get(string section, string key, long defaultValue)
         {
-            Int64 retVal = defaultValue;
-            Regex regex = new Regex("^[0-9]+$");
+            long retVal = defaultValue;
+            var regex = new Regex("^[0-9]+$");
 
-            string sVal = Get(section, key);
-            if (sVal != null)
+            var value = Get(section, key);
+            if (value != null)
             {
-                if (regex.IsMatch(sVal))
+                if (regex.IsMatch(value))
                 {
-                    if (Int64.TryParse(sVal, out long testValue))
+                    if (long.TryParse(value, out long testValue))
                     {
                         retVal = testValue;
                     }
@@ -218,14 +201,8 @@ namespace IniGetter
         /// <returns>Comment, or empty string if there is none.</returns>
         public string GetComment(string section, string key)
         {
-            string retVal = string.Empty;
-
             var item = _iniItems.GetIniItem(ConvertName(section), ConvertName(key));
-            if (item != null && string.IsNullOrEmpty(item.Comment))
-            {
-                retVal = item.Comment;
-            }
-            return retVal;
+            return item != null && !string.IsNullOrEmpty(item.Comment) ? item.Comment : string.Empty;
         }
 
         /// <summary>
@@ -257,14 +234,17 @@ namespace IniGetter
         public bool Load(string filePath, bool mergeFile = false, string prefix = "")
         {
             bool bReturn = true;
-            string[] iniLines = new string[] { };
+            var iniLines = new string[0];
+
             if (!mergeFile)
             {
                 Clear();
             }
+
             try
             {
                 ClearParseWarnings();
+
                 if (System.IO.File.Exists(filePath))
                 {
                     try
@@ -274,6 +254,8 @@ namespace IniGetter
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Exception occurred: {ex.Message}");
+                        SetParseWarning(0, $"Unable to retrieve file [{filePath}] contents: {ex.Message}");
+                        bReturn = false;
                     }
                 }
                 else
@@ -287,10 +269,12 @@ namespace IniGetter
                 SetParseWarning(0, $"Unable to retrieve file [{filePath}] contents: {ex.Message}");
                 bReturn = false;
             }
+
             if (bReturn)
             {
                 bReturn = ParseFromLines(iniLines, prefix);
             }
+
             return bReturn;
         }
 
@@ -307,8 +291,10 @@ namespace IniGetter
             {
                 Clear();
             }
-            string[] iniLines = data.ToLines();
+
+            var iniLines = data.ToLines();
             ClearParseWarnings();
+
             return ParseFromLines(iniLines, prefix);
         }
 
@@ -316,15 +302,21 @@ namespace IniGetter
         /// Saves the settings loaded in this instance to a file.
         /// </summary>
         /// <param name="filePath">Path of file to write out.</param>
-        /// <returns>True if the save occurs without issues, false if an error occurs.</returns>
+        /// <returns>True if the save occurs without issues, false if an error occurs, or if saving is disabled by the current options.</returns>
         public bool Save(string filePath)
         {
             ClearLastWarning();
             bool bReturn = false;
 
+            if (Options.ReadOnly || !Options.AllowSave)
+            {
+                SetLastWarning($"Saving ini file [{filePath}] is disabled by the current options.");
+                return false;
+            }
+
             try
             {
-                System.IO.File.WriteAllText(filePath, this.ToString());
+                System.IO.File.WriteAllText(filePath, ToString());
                 bReturn = true;
             }
             catch (Exception ex)
@@ -345,26 +337,26 @@ namespace IniGetter
         /// <returns>True if it overwrote an existing value, False if it is a new entry.</returns>
         public bool Set(string section, string key, string value, string comment = null)
         {
-            bool bReturn = false;
-
             var item = _iniItems.GetIniItem(ConvertName(section), ConvertName(key));
             if (item != null)
             {
                 item.Value = value;
                 item.Comment = comment;
+
+                return true;
             }
-            else
+
+            var newItem = new IniItem
             {
-                var newItem = new IniItem()
-                {
-                    Section = ConvertName(section),
-                    Key = ConvertName(key),
-                    Value = value,
-                    Comment = comment
-                };
-                _iniItems.Add(newItem);
-            }
-            return bReturn;
+                Section = ConvertName(section),
+                Key = ConvertName(key),
+                Value = value,
+                Comment = comment
+            };
+
+            _iniItems.Add(newItem);
+
+            return false;
         }
 
         /// <summary>
@@ -374,26 +366,30 @@ namespace IniGetter
         public override string ToString()
         {
             bool bInsertLine = false;
-            StringBuilder sbFileContent = new StringBuilder();
-            string[] sections = _iniItems.GetSections();
+            var sbFileContent = new StringBuilder();
+            var sections = _iniItems.GetSections();
             Array.Sort(sections, StringComparer.InvariantCulture);
-            foreach (string currentSection in sections)
+
+            foreach (var currentSection in sections)
             {
                 if (bInsertLine)
                 {
-                    sbFileContent.AppendLine("");
+                    sbFileContent.AppendLine();
                 }
                 else
                 {
                     bInsertLine = true;
                 }
+
                 if (!string.IsNullOrEmpty(currentSection))
                 {
                     sbFileContent.AppendLine($"[{currentSection}]");
                 }
-                string[] keys = _iniItems.GetKeys(currentSection);
+
+                var keys = _iniItems.GetKeys(currentSection);
                 Array.Sort(keys, StringComparer.InvariantCulture);
-                foreach (string currentKey in keys)
+
+                foreach (var currentKey in keys)
                 {
                     var item = _iniItems.GetIniItem(currentSection, currentKey);
                     if (item != null)
@@ -415,13 +411,11 @@ namespace IniGetter
                     }
                 }
             }
+
             return sbFileContent.ToString();
         }
 
-        private void ClearLastWarning()
-        {
-            LastWarning = "";
-        }
+        private void ClearLastWarning() => LastWarning = string.Empty;
 
         private void ClearParseWarnings()
         {
@@ -431,21 +425,18 @@ namespace IniGetter
 
         private string ConvertName(string name)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                name = String.Empty;
-            }
-
-            string retVal = name;
+            var retVal = name ?? string.Empty;
 
             if (Options.IgnoreSpacesInNames)
             {
                 retVal = retVal.Replace(" ", "");
             }
+
             if (!Options.CaseSensitive)
             {
-                retVal = retVal.ToLower();
+                retVal = retVal.ToLowerInvariant();
             }
+
             return retVal;
         }
 
@@ -456,15 +447,14 @@ namespace IniGetter
 
         private bool ParseFromLines(string[] lines, string prefix)
         {
-            string currentSection = "";
-            bool bReturn = false;
+            string currentSection = string.Empty;
             bool bMultiLine = false;
             int currentLineNumber = 1;
-            string previousLine = "";
+            string previousLine = string.Empty;
 
-            foreach (string line in lines)
+            foreach (var line in lines)
             {
-                string workLine = line.Trim();
+                var workLine = line.Trim();
                 if (Options.MultilineSupport)
                 {
                     if (bMultiLine)
@@ -472,26 +462,29 @@ namespace IniGetter
                         workLine = previousLine + workLine;
                         bMultiLine = false;
                     }
-                    if (!String.IsNullOrEmpty(workLine) && workLine[workLine.Length - 1] == '\\')
+                    if (!string.IsNullOrEmpty(workLine) && workLine[workLine.Length - 1] == '\\')
                     {
                         // Add in next line
                         bMultiLine = true;
                         previousLine = workLine.Substring(0, workLine.Length - 1);
                     }
-
                 }
+
                 if (!bMultiLine && !string.IsNullOrEmpty(workLine))
                 {
                     currentSection = ParseLine(currentLineNumber, workLine, currentSection, prefix);
                 }
+
                 currentLineNumber++;
             }
+
             // Handle case where multi-line slash is present on last line
             if (bMultiLine)
             {
-                ParseLine(currentLineNumber, previousLine, currentSection, prefix);
+                ParseLine(currentLineNumber-1, previousLine, currentSection, prefix);
             }
-            return bReturn;
+
+            return _parseWarnings.Count == 0;
         }
 
         private string ParseLine(int currentLineNumber, string workLine, string currentSection, string prefix)
@@ -499,13 +492,13 @@ namespace IniGetter
             string commentPart = null;
             if (!IsComment(workLine[0]))
             {
-                string tempLine = workLine.Trim();
+                var tempLine = workLine.Trim();
                 if (tempLine[0] == '[') // Section name
                 {
                     int endPos = tempLine.IndexOf(']');
                     if (endPos > 1)
                     {
-                        string sectionName = ConvertName(prefix + tempLine.Substring(1, endPos - 1).Trim());
+                        var sectionName = ConvertName(prefix + tempLine.Substring(1, endPos - 1).Trim());
                         if (sectionName.ValidateName())
                         {
                             currentSection = sectionName;
@@ -526,14 +519,11 @@ namespace IniGetter
                     int endPos = workLine.IndexOf(Options.NameValueDelimiter);
                     if (endPos > 0)
                     {
-                        string keyName = ConvertName(workLine.Substring(0, endPos).Trim());
+                        var keyName = ConvertName(workLine.Substring(0, endPos).Trim());
                         if (keyName.ValidateName())
                         {
-                            Regex checkQuoted = new Regex(@"""[^""\\]*(?:\\.[^""\\]*)*""");
-
-                            string valueCheck = workLine.Substring(endPos + 1).Trim();
-                            Match matchResult = checkQuoted.Match(valueCheck);
-                            if (!matchResult.Success)
+                            var valueCheck = workLine.Substring(endPos + 1).Trim();
+                            if (!valueCheck.TryExtractQuotedValue(Options.PoundComment, out string quotedValuePart, out string quotedCommentPart))
                             {
                                 // Check for comments
                                 int commentCheck = valueCheck.IndexOf(';');
@@ -544,7 +534,7 @@ namespace IniGetter
                                 }
                                 else
                                 {
-                                    commentCheck = valueCheck.IndexOf('#');
+                                    commentCheck = Options.PoundComment ? valueCheck.IndexOf('#') : -1;
                                     if (commentCheck > -1)
                                     {
                                         commentPart = valueCheck.Substring(commentCheck + 1).Trim();
@@ -552,23 +542,28 @@ namespace IniGetter
                                     }
                                 }
                             }
-                            string valuePart = valueCheck.IniUnescaped();
+                            else
+                            {
+                                valueCheck = quotedValuePart;
+                                commentPart = quotedCommentPart;
+                            }
+                            var valuePart = valueCheck.IniUnescaped();
                             var oldItem = _iniItems.GetIniItem(ConvertName(currentSection), ConvertName(keyName));
                             if (oldItem != null)
                             {
                                 SetParseWarning(currentLineNumber, $"Item overwritten [{oldItem.Section}][{oldItem.Key}] value ({oldItem.Value}) overwritten by ({valuePart})");
                                 oldItem.Value = valuePart;
-                                oldItem.Comment = commentPart.Trim();
+                                oldItem.Comment = string.IsNullOrEmpty(commentPart) ? null : commentPart.Trim();
                             }
                             else
                             {
-                                var newItem = new IniItem()
+                                var newItem = new IniItem
                                 {
                                     Section = currentSection,
                                     Key = keyName,
                                     Value = valuePart
                                 };
-                                if (!String.IsNullOrEmpty(commentPart))
+                                if (!string.IsNullOrEmpty(commentPart))
                                 {
                                     newItem.Comment = commentPart.Trim();
                                 }
@@ -592,7 +587,7 @@ namespace IniGetter
 
         private void SetParseWarning(int line, string warning)
         {
-            string warningText = $"Line {line} : {warning}";
+            var warningText = $"Line {line} : {warning}";
             _parseWarnings.Add(warningText);
             SetLastWarning(warningText);
         }
