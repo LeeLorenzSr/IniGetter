@@ -9,7 +9,7 @@ namespace IniGetter.Tests
         [Test]
         public void AlternativeKeyValuePairDelimiterTest()
         {
-            var iniTest = new IniFile("Data\\ColonDelimiter.ini", new IniOptions { NameValueDelimiter = ':' });
+            var iniTest = new IniFile(Path.Combine("Data","ColonDelimiter.ini"), new IniOptions { NameValueDelimiter = ':' });
 
             Assert.AreEqual("FirstValue", iniTest.Get("FirstSection", "FirstKey", "-"));
             Assert.IsTrue(iniTest.Get("FirstSection", "SecondKey", false));
@@ -29,7 +29,7 @@ namespace IniGetter.Tests
         [Test]
         public void GarbageInTest()
         {
-            var iniTest = new IniFile("Data\\Garbage.ini");
+            var iniTest = new IniFile(Path.Combine("Data","Garbage.ini"));
 
             Assert.NotZero(iniTest.ParseWarnings.Length);
             Assert.Zero(iniTest.GetSectionNames().Length);
@@ -48,8 +48,8 @@ namespace IniGetter.Tests
         [Test]
         public void MergeWithPrefixTest()
         {
-            var iniTest = new IniFile("Data\\FirstMerge.ini", null, "FirstFile.");
-            iniTest.Load("Data\\SecondMerge.ini", true, "SecondFile.");
+            var iniTest = new IniFile(Path.Combine("Data","FirstMerge.ini"), null, "FirstFile.");
+            iniTest.Load(Path.Combine("Data","SecondMerge.ini"), true, "SecondFile.");
 
             Assert.Zero(iniTest.ParseWarnings.Length);
             Assert.AreEqual("FirstValue", iniTest.Get("FirstFile.FirstSection", "FirstKey", "-"));
@@ -59,7 +59,7 @@ namespace IniGetter.Tests
         [Test]
         public void MultiLineLoadAndCheckTests()
         {
-            var iniTest = new IniFile("Data\\MultiLine.ini", new IniOptions { MultilineSupport = true });
+            var iniTest = new IniFile(Path.Combine("Data","MultiLine.ini"), new IniOptions { MultilineSupport = true });
             Assert.AreEqual("This is a multiline value!", iniTest.Get("FirstSection", "FirstValue", "-"));
             Assert.AreEqual("Checking for EOL", iniTest.Get("FirstSection", "SecondValue", "-"));
         }
@@ -67,7 +67,7 @@ namespace IniGetter.Tests
         [Test]
         public void ReplicationTest()
         {
-            var iniTest = new IniFile("Data\\TestIni01.ini", new IniOptions { MultilineSupport = true });
+            var iniTest = new IniFile(Path.Combine("Data","TestIni01.ini"), new IniOptions { MultilineSupport = true });
 
             var sGetFirstIni = iniTest.ToString();
             var iniDuplicate = new IniFile();
@@ -199,8 +199,8 @@ namespace IniGetter.Tests
         [Test]
         public void PlusOperatorTest()
         {
-            var iniTestA = new IniFile("Data\\FirstMerge.ini");
-            var iniTestB = new IniFile("Data\\MergeColon.ini", new IniOptions { NameValueDelimiter = ':' });
+            var iniTestA = new IniFile(Path.Combine("Data","FirstMerge.ini"));
+            var iniTestB = new IniFile(Path.Combine("Data","MergeColon.ini"), new IniOptions { NameValueDelimiter = ':' });
 
             var iniResult = iniTestA + iniTestB;
 
@@ -214,8 +214,8 @@ namespace IniGetter.Tests
         [Test]
         public void PlusEqualOperatorTest()
         {
-            var iniTestA = new IniFile("Data\\FirstMerge.ini");
-            var iniTestB = new IniFile("Data\\MergeColon.ini", new IniOptions { NameValueDelimiter = ':' });
+            var iniTestA = new IniFile(Path.Combine("Data","FirstMerge.ini"));
+            var iniTestB = new IniFile(Path.Combine("Data","MergeColon.ini"), new IniOptions { NameValueDelimiter = ':' });
 
             iniTestA += iniTestB;
 
