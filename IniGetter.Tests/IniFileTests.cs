@@ -135,6 +135,22 @@ namespace IniGetter.Tests
         }
 
         [Test]
+        public void QuotedValueWithInlineCommentRoundTripsWhenValueContainsCommentMarker()
+        {
+            var iniTest = new IniFile();
+
+            Assert.IsTrue(iniTest.LoadFromContent("[Section]\nKey=\"semi;colon\";comment"));
+            Assert.AreEqual("semi;colon", iniTest.Get("Section", "Key", string.Empty));
+            Assert.AreEqual("comment", iniTest.GetComment("Section", "Key"));
+
+            var iniDuplicate = new IniFile();
+
+            Assert.IsTrue(iniDuplicate.LoadFromContent(iniTest.ToString()));
+            Assert.AreEqual("semi;colon", iniDuplicate.Get("Section", "Key", string.Empty));
+            Assert.AreEqual("comment", iniDuplicate.GetComment("Section", "Key"));
+        }
+
+        [Test]
         public void SaveHonorsOptions()
         {
             var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".ini");

@@ -302,7 +302,7 @@ namespace IniGetter
         /// Saves the settings loaded in this instance to a file.
         /// </summary>
         /// <param name="filePath">Path of file to write out.</param>
-        /// <returns>True if the save occurs without issues, false if an error occurs.</returns>
+        /// <returns>True if the save occurs without issues, false if an error occurs, or if saving is disabled by the current options.</returns>
         public bool Save(string filePath)
         {
             ClearLastWarning();

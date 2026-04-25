@@ -45,8 +45,15 @@ namespace IniGetter.Helpers
         /// <returns>The escaped string.</returns>
         public static string IniEscaped(this string str)
         {
+            if (str == null)
+            {
+                return null;
+            }
+
             var retVal = JsonConvert.ToString(str);
-            return retVal.Contains('\\') ? retVal : str;
+            return str.Length != str.Trim().Length || str.Contains(";") || str.Contains("#") || retVal.Contains('\\')
+                ? retVal
+                : str;
         }
 
         /// <summary>
