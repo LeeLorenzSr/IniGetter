@@ -77,10 +77,6 @@ namespace IniGetter.Helpers
             {
                 return JsonConvert.DeserializeObject<string>(str);
             }
-            catch (JsonReaderException)
-            {
-                return str;
-            }
             catch (JsonException)
             {
                 return str;
@@ -190,7 +186,7 @@ namespace IniGetter.Helpers
         /// <returns>True if valid, otherwise false.</returns>
         public static bool ValidateName(this string str)
         {
-            Regex regex = new Regex(@"^[A-Za-z0-9_\-\! \.\@\&\^\$]+$");
+            Regex regex = new Regex(@"^[A-Za-z0-9_\-\! \.\@\&\^\$\%]+$");
 
             bool bReturn = false;
             if (str.Length > 0 && regex.IsMatch(str))
