@@ -135,6 +135,16 @@ namespace IniGetter.Tests
         }
 
         [Test]
+        public void LoadFromContentHandlesQuotedValuesWhenInlineCommentsContainQuotes()
+        {
+            var iniTest = new IniFile();
+
+            Assert.IsTrue(iniTest.LoadFromContent("[Section]\nKey=\"Line\\nBreak\";comment with \"quotes\""));
+            Assert.AreEqual("Line\nBreak", iniTest.Get("Section", "Key", string.Empty));
+            Assert.AreEqual("comment with \"quotes\"", iniTest.GetComment("Section", "Key"));
+        }
+
+        [Test]
         public void QuotedValueWithInlineCommentRoundTripsWhenValueContainsCommentMarker()
         {
             var iniTest = new IniFile();

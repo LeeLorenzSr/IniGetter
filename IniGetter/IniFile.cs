@@ -481,7 +481,7 @@ namespace IniGetter
             // Handle case where multi-line slash is present on last line
             if (bMultiLine)
             {
-                ParseLine(currentLineNumber, previousLine, currentSection, prefix);
+                ParseLine(currentLineNumber-1, previousLine, currentSection, prefix);
             }
 
             return _parseWarnings.Count == 0;

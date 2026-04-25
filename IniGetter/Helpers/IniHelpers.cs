@@ -142,7 +142,7 @@ namespace IniGetter.Helpers
 
         private static int FindClosingQuoteIndex(string str)
         {
-            for (int i = str.Length - 1; i > 0; i--)
+            for (int i = 1; i < str.Length; i++)
             {
                 if (str[i] != '"')
                 {
